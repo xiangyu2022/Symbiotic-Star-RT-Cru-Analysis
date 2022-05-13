@@ -7,8 +7,11 @@ Data and R codes for the paper The Nature of the Low-Energy Emission from Symbio
 First install and load the LPBkg and LPsmooth package:
 
 install.packages("LPBkg")
+
 install.packages("LPsmooth")
+
 library("LPBkg")
+
 library("LPsmooth")
 
 
