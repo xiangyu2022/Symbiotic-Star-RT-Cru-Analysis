@@ -23,7 +23,7 @@ Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-A
 
 Download the simulation results at: https://drive.google.com/file/d/1H0Hqpd9n5cWspnUJyNRiaPw-GjebYJXs/view?usp=sharing
 
-# Implement the codes 
+## Implementation of the codes 
 
 You may download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
 
