@@ -538,8 +538,7 @@ frame_n3=data.frame(Msel_eta.0_10n3=Msel_eta.0_10n3,D_eta.0_10n3=D_eta.0_10n3,T1
 # Now, let's load the simulation results. 
 load("~/Desktop/Simulation_new.RData")
 
-# We provide an example on how we generate the tables and plots in region 3, for other regions,
-# it can be applied very similarly (only change frame_n3 to frame_n4, frame_n5,... )
+# We provide an example on how we generate the tables and plots.
 
 pvalbonf<-function(xdf){
   pval<-ifelse(sum(xdf)!=0,M*pchisq(xdf[1],xdf[2],lower.tail=F),1)
