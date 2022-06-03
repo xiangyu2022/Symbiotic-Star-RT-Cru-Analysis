@@ -1,6 +1,7 @@
 # Load the data and necessary library
 library(LPBkg)
 library(LPsmooth)
+library(Hmisc)
 options(digits=15)
 bs1<-read.table("/Users/zxysmacbook/Downloads/16688_src.txt")
 bs2<-read.table("/Users/zxysmacbook/Downloads/18710_src.txt")
