@@ -364,31 +364,31 @@ sampler_xb9=function(n){
 }
 
 
-f_signal3=function(x) 1/((1+((x-12.131)/0.05)^2)^2.5)
+f_signal3=function(x) 1/((1+((x-rnorm(1,12.131,sd=0.005))/0.05)^2)^2.5)
 nor3=integrate(f_signal3,L3,U3)$value
 f_signal_nor3=function(x)f_signal3(x)/nor3
 
-f_signal4=function(x) 1/((1+((x-15.014)/0.05)^2)^2.5)
+f_signal4=function(x) 1/((1+((x-rnorm(1,15.014,sd=0.005))/0.05)^2)^2.5)
 nor4=integrate(f_signal4,L4,U4)$value
 f_signal_nor4=function(x)f_signal4(x)/nor4
 
-f_signal5=function(x) 1/((1+((x-17.051)/0.05)^2)^2.5)
+f_signal5=function(x) 1/((1+((x-rnorm(1,17.051,sd=0.005))/0.05)^2)^2.5)
 nor5=integrate(f_signal5,L5,U5)$value
 f_signal_nor5=function(x)f_signal5(x)/nor5
 
-f_signal6=function(x) 1/((1+((x-18.967)/0.05)^2)^2.5)
+f_signal6=function(x) 1/((1+((x-rnorm(1,18.967,sd=0.005))/0.05)^2)^2.5)
 nor6=integrate(f_signal6,L6,U6)$value
 f_signal_nor6=function(x)f_signal6(x)/nor6
 
-f_signal7=function(x) 1/((1+((x-21.602)/0.05)^2)^2.5)
+f_signal7=function(x) 1/((1+((x-rnorm(1,21.602,sd=0.005))/0.05)^2)^2.5)
 nor7=integrate(f_signal7,L7,U7)$value
 f_signal_nor7=function(x)f_signal7(x)/nor7
 
-f_signal8=function(x) 1/((1+((x-21.804)/0.05)^2)^2.5)
+f_signal8=function(x) 1/((1+((x-rnorm(1,21.804,sd=0.005))/0.05)^2)^2.5)
 nor8=integrate(f_signal8,L8,U8)$value
 f_signal_nor8=function(x)f_signal8(x)/nor8
 
-f_signal9=function(x) 1/((1+((x-22.101)/0.05)^2)^2.5)
+f_signal9=function(x) 1/((1+((x-rnorm(1,22.101,sd=0.005))/0.05)^2)^2.5)
 nor9=integrate(f_signal9,L9,U9)$value
 f_signal_nor9=function(x)f_signal9(x)/nor9
 
