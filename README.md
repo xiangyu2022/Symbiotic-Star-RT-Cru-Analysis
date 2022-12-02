@@ -27,9 +27,7 @@ Download the simulation results at: https://drive.google.com/file/d/1H0Hqpd9n5cW
 
 You may download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
 
-To implement the codes correctly, you need to change the command of loading data to your own path. 
-
-We include the simulation results because it took a very long time to run, we prepare it for you to check the answers directly. 
+It may take a very long time to run the simulation part.  
 
 For more technical problems, please contact the author of the paper Xiangyu Zhang at zhan6004@umn.edu.
 
