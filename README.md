@@ -36,5 +36,5 @@ For more technical problems, please contact the author of the paper Xiangyu Zhan
 
 ## References
 
-Zhang, X., Algeri, S., Karovska, M., Kashyap, V. (2022+) The Nature of the Low-Energy Emission from Symbiotic Star RT Cru. 
+Zhang, X., Algeri, S., Kashyap, V., Karovska, M. (2022+) A novel approach to detect line emission under high background in high-resolution X-ray spectra.
 
