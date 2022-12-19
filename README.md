@@ -17,7 +17,7 @@ library("LPBkg")
 
 library("LPsmooth")
 
-## Download the Datasets and the Simulation Results
+## Download the Datasets
 
 Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/datasets
 
