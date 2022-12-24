@@ -1,6 +1,6 @@
 # Symbiotic Star RT Cru Analysis
 
-Data and R codes for the paper A novel approach to detect line emission under high background in high-resolution X-ray spectra. 
+Data and R codes for the paper: A novel approach to detect line emission under high background in high-resolution X-ray spectra. 
 
 
 # Getting Started
