@@ -21,7 +21,7 @@ library("LPsmooth")
 
 Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/datasets
 
-Download the simulation results at: https://drive.google.com/file/d/1H0Hqpd9n5cWspnUJyNRiaPw-GjebYJXs/view?usp=sharing
+Download the simulation results at: https://drive.google.com/file/d/1-FqaEsOhGxrDjwMGi-DEtBrjYnDF_MWr/view?usp=sharing
 
 ## Implementation of the codes 
 
