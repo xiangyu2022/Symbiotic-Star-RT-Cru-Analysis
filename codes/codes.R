@@ -2,6 +2,7 @@
 library(LPBkg)
 library(LPsmooth)
 library(Hmisc)
+library(VGAM)
 options(digits=15)
 bs1<-read.table("/Users/zxysmacbook/Downloads/16688_src.txt")
 bs2<-read.table("/Users/zxysmacbook/Downloads/18710_src.txt")
@@ -86,8 +87,8 @@ unibkg51<-function(x)ifelse(x>=L51&x<=U51,1/(U51-L51),0)
 # A function which achieves the process of methods in section 3 and returns the three
 # adjusted p-values and the number of non-zero coefficients.  
 dhatL2_new <- function (data, g, M = 9, Mmax = NULL, smooth = TRUE, criterion = "BIC", 
-          hist.u = TRUE, breaks = 20, ylim = c(0, 2.5), range = c(min(data), 
-                                                                  max(data)), sigma = 2) 
+                        hist.u = TRUE, breaks = 20, ylim = c(0, 2.5), range = c(min(data), 
+                                                                                max(data)), sigma = 2) 
 {
   bluetrans <- rgb(0, 0, 250, 50, maxColorValue = 300)
   pinktrans <- rgb(30, 0, 10, 30, maxColorValue = 300)
@@ -483,169 +484,9 @@ G8=Vectorize(G8)
 G9=function(x) ifelse(x>=L9&x<=U9,integrate(bkg9,L9,upper=x)$value,0)
 G9=Vectorize(G9)
 
-
-etas=c(0,0.005, 0.025, 0.05,0.075,0.1,0.125,0.150,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35,0.375,0.4,0.45,0.5)
-for (i in etas){
-    for (k in 3:9){
-      init1="D_eta."
-      init2="Msel_eta."
-      init3="T1_eta."
-      init11=paste(init1,i,"_",k,"=c()",sep="")
-      init21=paste(init2,i,"_",k,"=c()",sep="")
-      init31=paste(init3,i,"_",k,"=c()",sep="")
-      eval(parse(text=init11))
-      eval(parse(text=init21))
-      eval(parse(text=init31))
-    }
-}
-
-# This simulation will take a very long time. 
-(n3=length(bs3));(n4=length(bs4));(n5=length(bs5));
-(n6=length(bs6));(n7=length(bs7));(n8=length(bs8));(n9=length(bs9))
-ns=c(n3,n4,n5,n6,n7,n8,n9)
-B=10000
-M=10
-for (i in 3:9){
-      for(eta in etas){
-        for (b in 1:B){
-          init1=paste("xb=sampler_xb",i,"(",ns[i-2],")",sep="")
-          eval(parse(text=init1))
-          init2=paste("xs=sampler_xs",i,"(",ns[i-2],")",sep="")
-          eval(parse(text=init2))
-          init3=paste("Mat<-matrix(rep(0,",ns[i-2],"*","2),ncol=2,nrow=",ns[i-2],")",sep="")
-          eval(parse(text=init3))
-          Mat[,1]=xb
-          Mat[,2]=xs
-          init4=paste("flags=t(rmultinom(",ns[i-2], ",size=rep(1,2), prob=c(1-",eta,",",eta,")))",sep="")
-          eval(parse(text=init4))
-          # flags <- t(rmultinom(10*n, size=rep(1,2), prob=c(1-eta,eta)))
-          xx <-as.numeric(apply(Mat*flags,1,sum))
-          init5=paste("uu=G",i,"(xx)",sep="")
-          eval(parse(text=init5))
-          S <- as.matrix(Legj(u = uu, m = M))
-          LP <- apply(S, FUN = "mean", 2)
-          init9=paste("LPsel<-denoise(LP,",ns[i-2],",method=\"BIC\") ",sep="")
-          eval(parse(text=init9))
-          init6=paste("Msel_eta.",eta,"_",i,"[b]=sum(LPsel!=0)",sep="")
-          init7=paste("D_eta.",eta,"_",i,"[b]=",ns[i-2],"*","sum(LPsel^2)",sep="")
-          init8=paste("T1_eta.",eta,"_",i,"[b]=",ns[i-2],"*","max(LP^2)",sep="")
-          eval(parse(text=init6))
-          eval(parse(text=init7))
-          eval(parse(text=init8))
-          print(c(i,eta,b))
-        }
-      }
-}
-
-# The simulation will be very time-consuming, which we provide the simulation results below directly. 
-# The simulation results are summarized in table frame_n3,...,frame_n9 as: (take region 3 as an example):
-frame_n3=data.frame(Msel_eta.0_3=Msel_eta.0_3,D_eta.0_3=D_eta.0_3,T1_eta.0_3=T1_eta.0_3,
-                    Msel_eta.0.005_3=Msel_eta.0.005_3,D_eta.0.005_3=D_eta.0.005_3,T1_eta.0.005_3=T1_eta.0.005_3,
-                     Msel_eta.0.025_3=Msel_eta.0.025_3,D_eta.0.025_3=D_eta.0.025_3,T1_eta.0.025_3=T1_eta.0.025_3,
-                     Msel_eta.0.05_3=Msel_eta.0.05_3,D_eta.0.05_3=D_eta.0.05_3,T1_eta.0.05_3=T1_eta.0.05_3,
-                     Msel_eta.0.075_3=Msel_eta.0.075_3,D_eta.0.075_3=D_eta.0.075_3,T1_eta.0.075_3=T1_eta.0.075_3,
-                     Msel_eta.0.1_3=Msel_eta.0.1_3,D_eta.0.1_3=D_eta.0.1_3,T1_eta.0.1_3=T1_eta.0.1_3,
-                     Msel_eta.0.125_3=Msel_eta.0.125_3,D_eta.0.125_3=D_eta.0.125_3,T1_eta.0.125_3=T1_eta.0.125_3,
-                     Msel_eta.0.15_3=Msel_eta.0.15_3,D_eta.0.15_3=D_eta.0.15_3,T1_eta.0.15_3=T1_eta.0.15_3,
-                     Msel_eta.0.175_3=Msel_eta.0.175_3,D_eta.0.175_3=D_eta.0.175_3,T1_eta.0.175_3=T1_eta.0.175_3,
-                     Msel_eta.0.2_3=Msel_eta.0.2_3,D_eta.0.2_3=D_eta.0.2_3,T1_eta.0.2_3=T1_eta.0.2_3,
-                    Msel_eta.0.25_3=Msel_eta.0.25_3,D_eta.0.25_3=D_eta.0.25_3,T1_eta.0.25_3=T1_eta.0.25_3,
-                    Msel_eta.0.3_3=Msel_eta.0.3_3,D_eta.0.3_3=D_eta.0.3_3,T1_eta.0.3_3=T1_eta.0.3_3,
-                    Msel_eta.0.35_3=Msel_eta.0.35_3,D_eta.0.35_3=D_eta.0.35_3,T1_eta.0.35_3=T1_eta.0.35_3,
-                    Msel_eta.0.4_3=Msel_eta.0.4_3,D_eta.0.4_3=D_eta.0.4_3,T1_eta.0.4_3=T1_eta.0.4_3,
-                    Msel_eta.0.45_3=Msel_eta.0.45_3,D_eta.0.45_3=D_eta.0.45_3,T1_eta.0.45_3=T1_eta.0.45_3,
-                    Msel_eta.0.5_3=Msel_eta.0.5_3,D_eta.0.5_3=D_eta.0.5_3,T1_eta.0.5_3=T1_eta.0.5_3
-                   )
-
-
-# Now, let's load the simulation results. 
-#load("~/Desktop/Simulation_new.RData")
-#save.image("Codes.RData")
-#save.image("NEW3.RData")
-load("/Users/zxysmacbook/NEW3.RData")
-# We provide an example on how we generate the tables and plots in region 3, for other regions,
-# it can be applied very similarly (only change frame_n3 to frame_n4, frame_n5,... )
-
-pvalbonf<-function(xdf){
-  pval<-ifelse(sum(xdf)!=0,M*pchisq(xdf[1],xdf[2],lower.tail=F),1)
-  return(pval)
-  }
-
-#Power######################################################
-
-sidak=function(x,M=9){return(1-(1-x)^(1/M))}
-
-Power_T1_10n<-MCerror_power_T1_10n<-Power_Bonf_10n<-MCerror_power_Bonf_10n<-Power_naive_10n<-MCerror_power_naive_10n<-c()
-alpha_ori=0.05
-alpha=sidak(alpha_ori)
-for(i in 1:9){
-  T1<-frame_n3[,3*i+3]
-  pval_T1<-1-(pchisq(T1,1))^M
-  Power_T1_10n[i]<-mean(pval_T1<alpha)
-  MCerror_power_T1_10n[i]<-sqrt(Power_T1_10n[i]*(1- Power_T1_10n[i])/B)
-  
-  Msel<-frame_n3[,3*i+1] # Deviance
-  Dev<-frame_n3[,3*i+2] # Mselected or Degree of Freedom.
-  
-  pval_Bonf<-apply(cbind(Dev,Msel),1,pvalbonf)
-  Power_Bonf_10n[i]<-mean(pval_Bonf<alpha)
-  MCerror_power_Bonf_10n[i]<-sqrt( Power_Bonf_10n[i]*(1- Power_Bonf_10n[i])/B)
-  
-  pval_naive<-pchisq(Dev,M,lower.tail = F)
-  Power_naive_10n[i]<-mean(pval_naive<alpha)
-  MCerror_power_naive_10n[i]<-sqrt( Power_naive_10n[i]*(1- Power_naive_10n[i])/B)
-  print(i)
-}
-
-eta_new=etas
-
-#etas<-c(0.025,0.05,0.075,0.1,0.125,0.15,0.175,0.2)
-par(mar=c(5,5,3,1))
-plot(eta_new[-1],Power_naive_10n,pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',
-     main="n3=730",cex.main=2.5
-     )
-points(eta_new[-1],Power_Bonf_10n,pch=15,col="tomato3",cex=2,type="o") # Bon
-points(eta_new[-1],Power_T1_10n,pch=16,col="darkgreen",cex=2,type="o") # T1
-#legend("topleft",legend=c(expression(Bonferroni), expression(T1), expression(Naive)),pch=c(15,16,17),
-#       col=c("tomato3","darkgreen","dodgerblue"),cex=1)
-Axis(side = 1, at = eta_new, cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-
-# The upper limits can be calculated accordingly by the plot. 
-
-# The p-values can be calculated as follows: 
-
-#K
-One_minus_pval_T1_eta0<-(pchisq(frame_n3[,3],1))^M
-TypeIerror_T1_10n<-mean(One_minus_pval_T1_eta0>1-alpha)
-TypeIerror_T1_10n
-
-#MC error
-sqrt(TypeIerror_T1_10n*(1-TypeIerror_T1_10n)/B)
-
-#Bonferroni
-pval_Bonf_eta0<-apply(cbind(frame_n3[,2],frame_n3[,1]),1,pvalbonf)
-TypeIerror_Bonferroni_10n<-mean(pval_Bonf_eta0<alpha)
-TypeIerror_Bonferroni_10n
-
-#0.0614
-
-#MC error
-sqrt(TypeIerror_Bonferroni_10n*(1-TypeIerror_Bonferroni_10n)/B)
-
-
-#Naive correction
-pval_naive_eta0<-pchisq(frame_n3[,3],M,lower.tail = F)
-TypeIerror_naive_10n<-mean(pval_naive_eta0<alpha)
-TypeIerror_naive_10n
-
-#MC error
-sqrt(TypeIerror_naive_10n*(1-TypeIerror_naive_10n)/B)
-
 #Likelihood Ratio Test
 ns=c(n1,n2,n3,n4,n5,n6,n7,n8,n9)
 
-library(VGAM)
 lsf<-function(w0,w){1/(1+((w-w0)/0.05)^2)^2.5}
 k_lsf<-function(w)integrate(lsf,lower=L,upper=U,w=w)$value
 k_lsf<-Vectorize(k_lsf)
@@ -692,11 +533,6 @@ ll_bs_new5<-function(pars,x){
   -sum(log((1-pars[1])*bkg5(x)+pars[1]*fe5_norm(x,rnorm(1,17.051,0.005))))
 }
 
-int5 <- function(w0) integrate(fe,lower=L5,upper=U5,w0=w0)$value
-fe5_norm <- function(x,w0) fe(x,w0)/int5(w0)
-ll_bs_new5<-function(pars,x){
-  -sum(log((1-pars[1])*bkg5(x)+pars[1]*fe5_norm(x,rnorm(1,16.951,0.005))))
-}
 
 int6 <- function(w0) integrate(fe,lower=L6,upper=U6,w0=w0)$value
 fe6_norm <- function(x,w0) fe(x,w0)/int6(w0)
@@ -722,7 +558,8 @@ ll_bs_new9<-function(pars,x){
   -sum(log((1-pars[1])*bkg9(x)+pars[1]*fe9_norm(x,rnorm(1,22.101,0.005))))
 }
 
-set.seed(1234)
+
+
 MLE3 = optimize(f=ll_bs_new3, interval=c(0,1), x=bs3)
 MLE4 = optimize(f=ll_bs_new4, interval=c(0,1), x=bs4)
 MLE5 = optimize(f=ll_bs_new5, interval=c(0,1), x=bs5)
@@ -739,20 +576,138 @@ MLE9 = optimize(f=ll_bs_new9, interval=c(0,1), x=bs9)
 (pval_like8=pchisq(-2*(sum(log(bkg8(bs8))) + MLE8$objective),df=1,lower.tail = FALSE)/2)
 (pval_like9=pchisq(-2*(sum(log(bkg9(bs9)))+ MLE9$objective),df=1,lower.tail = FALSE)/2)
 
-# sidak_like(pval_like3,7);sidak_like(pval_like4,7) #....
 
+
+
+
+# The simulation will be very time-consuming, which we provide the simulation results below directly. 
+# Here, instead of running the simulation yourself, we recommend you to load the results obtained 
+# by us directly MNRAS224808.RData (provided in our github page)
+etas=c(0,0.005, 0.025, 0.05,0.075,0.1,0.125,0.150,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35,0.375,0.4)
+for (i in etas){
+  for (k in 3:9){
+    init1="D_eta."
+    init2="Msel_eta."
+    init3="T1_eta."
+    init11=paste(init1,i,"_",k,"=c()",sep="")
+    init21=paste(init2,i,"_",k,"=c()",sep="")
+    init31=paste(init3,i,"_",k,"=c()",sep="")
+    init41=paste("LRT_eta.",i,"_",k,"=c()",sep="")
+    eval(parse(text=init11))
+    eval(parse(text=init21))
+    eval(parse(text=init31))
+    eval(parse(text=init41))
+  }
+}
+
+(n3=length(bs3));(n4=length(bs4));(n5=length(bs5));
+(n6=length(bs6));(n7=length(bs7));(n8=length(bs8));(n9=length(bs9))
+ns=c(n3,n4,n5,n6,n7,n8,n9)
+B=10000
+M=10
+
+load("MNRAS224808.RData")
+
+# for (i in 3:9){
+#   for(eta in etas){
+#     for (b in 1:B){
+#       init1=paste("xb=sampler_xb",i,"(",ns[i-2],")",sep="")
+#       eval(parse(text=init1))
+#       init2=paste("xs=sampler_xs",i,"(",ns[i-2],")",sep="")
+#       eval(parse(text=init2))
+#       init3=paste("Mat<-matrix(rep(0,",ns[i-2],"*","2),ncol=2,nrow=",ns[i-2],")",sep="")
+#       eval(parse(text=init3))
+#       Mat[,1]=xb
+#       Mat[,2]=xs
+#       init4=paste("flags=t(rmultinom(",ns[i-2], ",size=rep(1,2), prob=c(1-",eta,",",eta,")))",sep="")
+#       eval(parse(text=init4))
+#       # flags <- t(rmultinom(10*n, size=rep(1,2), prob=c(1-eta,eta)))
+#       xx <-as.numeric(apply(Mat*flags,1,sum))
+#       init5=paste("uu=G",i,"(xx)",sep="")
+#       eval(parse(text=init5))
+#       S <- as.matrix(Legj(u = uu, m = M))
+#       LP <- apply(S, FUN = "mean", 2)
+#       init9=paste("LPsel<-denoise(LP,",ns[i-2],",method=\"BIC\") ",sep="")
+#       eval(parse(text=init9))
+#       init6=paste("Msel_eta.",eta,"_",i,"[b]=sum(LPsel!=0)",sep="")
+#       init7=paste("D_eta.",eta,"_",i,"[b]=",ns[i-2],"*","sum(LPsel^2)",sep="")
+#       init8=paste("T1_eta.",eta,"_",i,"[b]=",ns[i-2],"*","max(LP^2)",sep="")
+#       init10=paste("LRT_eta.",eta,"_",i,"[b]=-2*(sum(log(bkg",i,"(xx)))+optimize(f=ll_bs_new",i,",interval=c(0,1), x=xx)$objective)",sep="")
+#       eval(parse(text=init6))
+#       eval(parse(text=init7))
+#       eval(parse(text=init8))
+#       eval(parse(text=init10))
+#       print(c(i,eta,b))
+#     }
+#   }
+# }
+
+# The simulation results are summarized in table frame_n3,...,frame_n9 as: (take region 3 as an example):
+frame_n3=data.frame(Msel_eta.0_3=Msel_eta.0_3,D_eta.0_3=D_eta.0_3,T1_eta.0_3=T1_eta.0_3,
+                    Msel_eta.0.005_3=Msel_eta.0.005_3,D_eta.0.005_3=D_eta.0.005_3,T1_eta.0.005_3=T1_eta.0.005_3,
+                    Msel_eta.0.025_3=Msel_eta.0.025_3,D_eta.0.025_3=D_eta.0.025_3,T1_eta.0.025_3=T1_eta.0.025_3,
+                    Msel_eta.0.05_3=Msel_eta.0.05_3,D_eta.0.05_3=D_eta.0.05_3,T1_eta.0.05_3=T1_eta.0.05_3,
+                    Msel_eta.0.075_3=Msel_eta.0.075_3,D_eta.0.075_3=D_eta.0.075_3,T1_eta.0.075_3=T1_eta.0.075_3,
+                    Msel_eta.0.1_3=Msel_eta.0.1_3,D_eta.0.1_3=D_eta.0.1_3,T1_eta.0.1_3=T1_eta.0.1_3,
+                    Msel_eta.0.125_3=Msel_eta.0.125_3,D_eta.0.125_3=D_eta.0.125_3,T1_eta.0.125_3=T1_eta.0.125_3,
+                    Msel_eta.0.15_3=Msel_eta.0.15_3,D_eta.0.15_3=D_eta.0.15_3,T1_eta.0.15_3=T1_eta.0.15_3,
+                    Msel_eta.0.175_3=Msel_eta.0.175_3,D_eta.0.175_3=D_eta.0.175_3,T1_eta.0.175_3=T1_eta.0.175_3,
+                    Msel_eta.0.2_3=Msel_eta.0.2_3,D_eta.0.2_3=D_eta.0.2_3,T1_eta.0.2_3=T1_eta.0.2_3,
+                    Msel_eta.0.25_3=Msel_eta.0.25_3,D_eta.0.25_3=D_eta.0.25_3,T1_eta.0.25_3=T1_eta.0.25_3,
+                    Msel_eta.0.3_3=Msel_eta.0.3_3,D_eta.0.3_3=D_eta.0.3_3,T1_eta.0.3_3=T1_eta.0.3_3,
+                    Msel_eta.0.35_3=Msel_eta.0.35_3,D_eta.0.35_3=D_eta.0.35_3,T1_eta.0.35_3=T1_eta.0.35_3,
+                    Msel_eta.0.4_3=Msel_eta.0.4_3,D_eta.0.4_3=D_eta.0.4_3,T1_eta.0.4_3=T1_eta.0.4_3
+)
+
+
+pvalbonf<-function(xdf){
+  pval<-ifelse(sum(xdf)!=0,M*pchisq(xdf[1],xdf[2],lower.tail=F),1)
+  return(pval)
+}
+
+
+pval_like2=c();pval_like=c()
+for (i in 3:9){
+  initp = paste("pval_like[i-2]=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
+  eval(parse(text=initp))
+  initp2 = paste("pval_like2[i-2]=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
+  eval(parse(text=initp2))
+  initpo=paste("Power_like_",i,"=Power_like_sidak_",i,"=c()",sep="")
+  eval(parse(text=initpo))
+  for (j in 1:length(etas[1:18][-1])){
+    initpo1 = paste("Power_like_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
+    eval(parse(text=initpo1))
+    initpo2 = paste("Power_like_sidak_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
+    eval(parse(text=initpo2))
+  }
+}
 
 alpha=0.05
+sidak=function(x,M=9){return(1-(1-x)^(1/M))}
 alphas=sidak(alpha,7)
-#alpha=0.05
+pval_like2=c()
 for (i in 3:9){
   call0=paste("frame_n",i,"=data.frame(Msel_eta.0_",i,"=Msel_eta.0_",i,",D_eta.0_",i,"=D_eta.0_",i,",T1_eta.0_",i,"=T1_eta.0_",i,",Msel_eta.0.005_",i,"=Msel_eta.0.005_",i,",D_eta.0.005_",i,"=D_eta.0.005_",i,",T1_eta.0.005_",i,"=T1_eta.0.005_",i,",Msel_eta.0.025_",i,"=Msel_eta.0.025_",i,",D_eta.0.025_",i,"=D_eta.0.025_",i,",T1_eta.0.025_",i,"=T1_eta.0.025_",i,",Msel_eta.0.05_",i,"=Msel_eta.0.05_",i,",D_eta.0.05_",i,"=D_eta.0.05_",i,",T1_eta.0.05_",i,"=T1_eta.0.05_",i,",Msel_eta.0.075_",i,"=Msel_eta.0.075_",i,",D_eta.0.075_",i,"=D_eta.0.075_",i,",T1_eta.0.075_",i,"=T1_eta.0.075_",i,",Msel_eta.0.1_",i,"=Msel_eta.0.1_",i,",D_eta.0.1_",i,"=D_eta.0.1_",i,",T1_eta.0.1_",i,"=T1_eta.0.1_",i,",Msel_eta.0.125_",i,"=Msel_eta.0.125_",i,",D_eta.0.125_",i,"=D_eta.0.125_",i,",T1_eta.0.125_",i,"=T1_eta.0.125_",i,",Msel_eta.0.15_",i,"=Msel_eta.0.15_",i,",D_eta.0.15_",i,"=D_eta.0.15_",i,",T1_eta.0.15_",i,"=T1_eta.0.15_",i,",Msel_eta.0.175_",i,"=Msel_eta.0.175_",i,",D_eta.0.175_",i,"=D_eta.0.175_",i,",T1_eta.0.175_",i,"=T1_eta.0.175_",i,",Msel_eta.0.2_",i,"=Msel_eta.0.2_",i,",D_eta.0.2_",i,"=D_eta.0.2_",i,",T1_eta.0.2_",i,"=T1_eta.0.2_",i,",Msel_eta.0.225_",i,"=Msel_eta.0.225_",i,",D_eta.0.225_",i,"=D_eta.0.225_",i,",T1_eta.0.225_",i,"=T1_eta.0.225_",i,",Msel_eta.0.25_",i,"=Msel_eta.0.25_",i,",D_eta.0.25_",i,"=D_eta.0.25_",i,",T1_eta.0.25_",i,"=T1_eta.0.25_",i,",Msel_eta.0.275_",i,"=Msel_eta.0.275_",i,",D_eta.0.275_",i,"=D_eta.0.275_",i,",T1_eta.0.275_",i,"=T1_eta.0.275_",i,",Msel_eta.0.3_",i,"=Msel_eta.0.3_",i,",D_eta.0.3_",i,"=D_eta.0.3_",i,",T1_eta.0.3_",i,"=T1_eta.0.3_",i,",Msel_eta.0.325_",i,"=Msel_eta.0.325_",i,",D_eta.0.325_",i,"=D_eta.0.325_",i,",T1_eta.0.325_",i,"=T1_eta.0.325_",i,",Msel_eta.0.35_",i,"=Msel_eta.0.35_",i,",D_eta.0.35_",i,"=D_eta.0.35_",i,",T1_eta.0.35_",i,"=T1_eta.0.35_",i,",Msel_eta.0.375_",i,"=Msel_eta.0.375_",i,",D_eta.0.375_",i,"=D_eta.0.375_",i,",T1_eta.0.375_",i,"=T1_eta.0.375_",i,",Msel_eta.0.4_",i,"=Msel_eta.0.4_",i,",D_eta.0.4_",i,"=D_eta.0.4_",i,",T1_eta.0.4_",i,"=T1_eta.0.4_",i,",Msel_eta.0.45_",i,"=Msel_eta.0.45_",i,",D_eta.0.45_",i,"=D_eta.0.45_",i,",T1_eta.0.45_",i,"=T1_eta.0.45_",i,",Msel_eta.0.5_",i,"=Msel_eta.0.5_",i,",D_eta.0.5_",i,"=D_eta.0.5_",i,",T1_eta.0.5_",i,"=T1_eta.0.5_",i,")",sep="")
-  eval(parse(text=call0))
   call1 = paste("Power_T1_",i,"<-MCerror_power_T1_",i,"<-Power_Bonf_",i,"<-MCerror_power_Bonf_",i,"<-Power_naive_",i,"<-MCerror_power_naive_",i,"<-c()",sep="")
   call2 = paste("Power_T1_sidak",i,"<-MCerror_power_T1_sidak",i,"<-Power_Bonf_sidak",i,"<-MCerror_power_Bonf_sidak",i,"<-Power_naive_sidak",i,"<-MCerror_power_naive_sidak",i,"<-c()",sep="")
+  eval(parse(text=call0))
   eval(parse(text=call1))
   eval(parse(text=call2))
+  
+  initp = paste("pval_like=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
+  eval(parse(text=initp))
+  initp2 = paste("pval_like2=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
+  eval(parse(text=initp2))
+  initpo=paste("Power_like_",i,"=Power_like_sidak_",i,"=c()",sep="")
+  eval(parse(text=initpo))
+  for (j in 1:length(etas[1:14][-1])){
+    initpo1 = paste("Power_like_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
+    eval(parse(text=initpo1))
+    initpo2 = paste("Power_like_sidak_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
+    eval(parse(text=initpo2))
+  }
 }
+
 
 for (j in 3:9){
   for(i in 1:17){
@@ -809,163 +764,172 @@ for (j in 3:9){
 }
 
 
-# Plot for 3
-etas_new = c(0,0.005, 0.025, 0.05,0.075,0.1,0.125,0.150,0.175,0.2,0.225,0.25,0.275,0.3,0.325,0.35,0.375,0.4,0.45,0.5)
-par(mar=c(5,5,3,1))
+# Power plot for region 3
+par(mar=c(4.5,5,3,0.5))
 plot(etas_new[-1][1:9],Power_naive_3[1:9],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n3=730",cex.main=2.5,lwd=2)
-points(etas_new[-1][1:9],Power_Bonf_3[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_3[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_3[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n3=730",cex.main=2.5,lwd=2.5)
+points(etas_new[-1][1:9],Power_Bonf_3[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_3[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_3[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
-points(etas_new[-1][1:9],Power_naive_sidak3[1:9],pch=2,col="dodgerblue",cex=2,type="o",lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_Bonf_sidak3[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_sidak3[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_sidak_3[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:9], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+points(etas_new[-1][1:9],Power_naive_sidak3[1:9],pch=2,col="dodgerblue",cex=2,type="o",lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_Bonf_sidak3[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_sidak3[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_sidak_3[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black", col.lab = "black")
+Axis(side = 1, at = c(0.005,0.025,0.05, 0.075, 0.1, 0.125,0.15, 0.175, 0.2), cex.axis=2,cex=2,col = "black", col.lab = "black")
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 # round(c(0.062,0.063,0.084,0.073,0.0875,0.092)*730,2)
 # round(c(0.096,0.098,0.117,0.106,0.122,0.122)*730,2)
 abline(v=0.072,col="grey")
 # c(0.041,0.067,0.054,0.073)*730
 
-# Plot for 4
+# Power plot for region 4
 plot(etas_new[-1][1:13],Power_naive_4[1:13],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n4=247",cex.main=2.5,lwd=2)
-points(etas_new[-1][1:13],Power_Bonf_4[1:13],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:13],Power_T1_4[1:13],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:13],Power_like_4[1:13],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n4=247",cex.main=2.5,lwd=2.5)
+points(etas_new[-1][1:13],Power_Bonf_4[1:13],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:13],Power_T1_4[1:13],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:13],Power_like_4[1:13],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
-points(etas_new[-1][1:13],Power_naive_sidak4[1:13],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:13],Power_Bonf_sidak4[1:13],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:13],Power_T1_sidak4[1:13],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:13],Power_like_sidak_4[1:13],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:13], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+points(etas_new[-1][1:13],Power_naive_sidak4[1:13],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:13],Power_Bonf_sidak4[1:13],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:13],Power_T1_sidak4[1:13],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:13],Power_like_sidak_4[1:13],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black", col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:13], cex.axis=2,cex=2, col = "black", col.lab = "black")
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 # c(0.117,0.127,0.156,0.138,0.172,0.173)*247
 # c(0.181,0.195,0.217,0.20,0.242,0.233)*247
 
 #c(0.081,0.131,0.107,0.16)*247
 
-# Plot for 5
+# Power plot for region 5
 plot(etas_new[-1][1:9],Power_naive_5[1:9],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n5=471",cex.main=2.5,lwd=2)
-points(etas_new[-1][1:9],Power_Bonf_5[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_5[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_5[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n5=471",cex.main=2.5,lwd=2.5)
+points(etas_new[-1][1:9],Power_Bonf_5[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_5[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_5[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
-points(etas_new[-1][1:9],Power_naive_sidak5[1:9],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_Bonf_sidak5[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_sidak5[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_sidak_5[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
+points(etas_new[-1][1:9],Power_naive_sidak5[1:9],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_Bonf_sidak5[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_sidak5[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_sidak_5[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
 
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:9], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black",  col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:9], cex.axis=2,cex=2, col = "black",  col.lab = "black")
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 round(c(0.075,0.078,0.101,0.088,0.107,0.111)*471,2)
 round(c(0.117,0.121,0.139,0.125,0.147,0.149)*471,2)
 c(0.051,0.075,0.064,0.093)*471
 
-# Plot for 6
+# Power plot for region 6
 plot(etas_new[-1][1:9],Power_naive_6[1:9],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n6=390",cex.main=2.5,lwd=2
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n6=390",cex.main=2.5,lwd=2.5
 )
-points(etas_new[-1][1:9],Power_Bonf_6[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_6[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_6[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+points(etas_new[-1][1:9],Power_Bonf_6[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_6[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_6[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
 #legend("topleft",legend=c(expression(Bonferroni), expression(T1), expression(Naive)),pch=c(15,16,17),
 #       col=c("tomato3","darkgreen","dodgerblue"),cex=1)
-points(etas_new[-1][1:9],Power_naive_sidak6[1:9],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_Bonf_sidak6[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:9],Power_T1_sidak6[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:9],Power_like_sidak_6[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
+points(etas_new[-1][1:9],Power_naive_sidak6[1:9],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_Bonf_sidak6[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:9],Power_T1_sidak6[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:9],Power_like_sidak_6[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
 
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:9], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2.5,cex=2., col = "black", col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:9], cex.axis=2,cex=2, col = "black", col.lab = "black")
+
+# This is how we calculate upper limits for region 6. 
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 c(0.084,0.088,0.113,0.1,0.121,0.125)*390
 c(0.131,0.138,0.156,0.144,0.171,0.168)*390
 c(0.058,0.089,0.072,0.101)*390
 
-# Plot for 7
+# Power plot for region 7 in Figure 4. 
 plot(etas_new[-1][1:17],Power_naive_7[1:17],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n7=179",cex.main=2.5,lwd=2
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n7=179",cex.main=2.5,lwd=2.5
 )
-points(etas_new[-1][1:17],Power_Bonf_7[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_7[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
+points(etas_new[-1][1:17],Power_Bonf_7[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_7[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
 #legend("topleft",legend=c(expression(Bonferroni), expression(T1), expression(Naive)),pch=c(15,16,17),
 #       col=c("tomato3","darkgreen","dodgerblue"),cex=1)
-points(etas_new[-1][1:17],Power_like_7[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+points(etas_new[-1][1:17],Power_like_7[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
-points(etas_new[-1][1:17],Power_naive_sidak7[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:17],Power_Bonf_sidak7[1:17],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_sidak7[1:17],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:17],Power_like_sidak_7[1:17],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:17], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+points(etas_new[-1][1:17],Power_naive_sidak7[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_Bonf_sidak7[1:17],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_sidak7[1:17],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:17],Power_like_sidak_7[1:17],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black",  col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:17], cex.axis=2,cex=2, col = "black",  col.lab = "black")
 
+# This is how we calculate upper limits for region 7 .
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 round(c(0.15,0.168,0.205,0.183,0.231,0.23)*179,2)
 round(c(0.235,0.256,0.28,0.26,0.317,0.3)*179,2)
-
 abline(v=0.201)
 round(c(0.1,0.166,0.135,0.201)*179,2)
-# Plot for 8
+
+# Power plot for region 8 in Figure 4. 
 plot(etas_new[-1][1:17],Power_naive_8[1:17],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n8=145",cex.main=2.5,lwd=2)
-points(etas_new[-1][1:17],Power_Bonf_8[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_8[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:17],Power_like_8[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n8=145",cex.main=2.5,lwd=2.5)
+points(etas_new[-1][1:17],Power_Bonf_8[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_8[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:17],Power_like_8[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
 #legend("topleft",legend=c(expression(Bonferroni), expression(T1), expression(Naive)),pch=c(15,16,17),
 #       col=c("tomato3","darkgreen","dodgerblue"),cex=1)
 
-points(etas_new[-1][1:17],Power_naive_sidak8[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Naive
-points(etas_new[-1][1:17],Power_Bonf_sidak8[1:17],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_sidak8[1:17],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2) # T1
-points(etas_new[-1][1:17],Power_like_sidak_8[1:17],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:17], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+points(etas_new[-1][1:17],Power_naive_sidak8[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Naive
+points(etas_new[-1][1:17],Power_Bonf_sidak8[1:17],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_sidak8[1:17],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:17],Power_like_sidak_8[1:17],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black",  col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:17], cex.axis=2,cex=2, col = "black",  col.lab = "black")
 
+# This is how we calculate upper limits for region 8.
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 abline(v=0.25,col="grey")
 round(c(0.185,0.206,0.259,0.229,0.275,0.291)*145,2)
 round(c(0.288,0.314,0.35,0.321,0.375,0.384)*145,2)
 round(c(0.123,0.209,0.171,0.25)*145,2)
-# Plot for 9
+
+# Power plot for region 9 in Figure 4. 
 plot(etas_new[-1][1:17],Power_naive_9[1:17],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
-     ylab="Power",cex=2,type="o",cex.axis=1.8,cex.lab=2,xaxt='n',yaxt='n',
-     main="n9=390",cex.main=2.5,lwd=2)
-points(etas_new[-1][1:17],Power_Bonf_9[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_9[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2) # T1
-points(etas_new[-1][1:17],Power_like_9[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2) # likelihood
+     ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
+     main="n9=390",cex.main=2.5,lwd=2.5)
+points(etas_new[-1][1:17],Power_Bonf_9[1:17],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_9[1:17],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
+points(etas_new[-1][1:17],Power_like_9[1:17],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
 
-points(etas_new[-1][1:17],Power_naive_sidak9[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2) # Bon
-points(etas_new[-1][1:17],Power_Bonf_sidak9[1:17],pch=0,col="tomato3",cex=2,type="o",lty=2,lwd=2) # Bon
-points(etas_new[-1][1:17],Power_T1_sidak9[1:17],pch=1,col="darkgreen",cex=2,type="o",lty=2,lwd=2) # T1
-points(etas_new[-1][1:17],Power_like_sidak_9[1:17],pch=5,col="grey1",cex=2,type="o",lty=2,lwd=2) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = etas_new[-1][1:17], cex.axis=1.8,cex=2, col = "black", col.lab = "black")
+points(etas_new[-1][1:17],Power_naive_sidak9[1:17],pch=2,col="dodgerblue",cex=2,type="o", lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_Bonf_sidak9[1:17],pch=0,col="tomato3",cex=2,type="o",lty=2,lwd=2.5) # Bon
+points(etas_new[-1][1:17],Power_T1_sidak9[1:17],pch=1,col="darkgreen",cex=2,type="o",lty=2,lwd=2.5) # T1
+points(etas_new[-1][1:17],Power_like_sidak_9[1:17],pch=5,col="grey1",cex=2,type="o",lty=2,lwd=2.5) # likelihood
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black",  col.lab = "black")
+Axis(side = 1, at = etas_new[-1][1:17], cex.axis=2,cex=2, col = "black",  col.lab = "black")
 
+# This is how we calculate upper limits for region 9.
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 abline(v=0.197,col="grey")
 c(0.15,0.17,0.204,0.183,0.234,0.229)*390
 c(0.235,0.258,0.282,0.26,0.321,0.303)*390
 c(0.097,0.163,0.133,0.197)*390
+
+
+# Legend plot in Figure 4. 
+par(mar=c(4.5,5,3,0.5))
 plot(1,ylim=c(0,0.9),xaxt='n',yaxt='n',cex.main=2.5,ylab="",xlab="")
 legend("center",legend=c(expression(Bonferroni), expression(K), expression(Naive),expression(LRT),
                          expression("Bonferroni with Sidak's correction"), expression("K with Sidak's correction"), 
                          expression("Naive with Sidak's correction"),expression("LRT with Sidak's correction")),pch=c(15,16,17,23,0,1,2,5),pt.bg=c("tomato3","darkgreen","dodgerblue","grey1"),
-       col=c("tomato3","darkgreen","dodgerblue","grey1"),cex=2.4,lty=c(1,1,1,1,2,2,2,2), lwd=2,
+       col=c("tomato3","darkgreen","dodgerblue","grey1"),cex=2.4,lty=c(1,1,1,1,2,2,2,2), lwd=2.5,
        bty = "n")
 
 TypeIerror_T1 <- TypeIerror_Bonferroni<-TypeIerror_naive<-MCerror_T1<-MCerror_Bonferroni<-MCerror_naive<-c()
@@ -995,114 +959,18 @@ TypeIerror_T1;TypeIerror_Bonferroni;TypeIerror_naive
 MCerror_T1;MCerror_Bonferroni;MCerror_naive
 
 
-for (i in etas_new[15:18]){
-  for (k in 4){
-    init11=paste("LRT_eta.",i,"_",k,"=c()",sep="")
-    eval(parse(text=init11))
-  }
+# 14.908 & 16.93 in section 5.3. 
+# Constrction of upper limits and power curves can be got follows exactly the same way as above. 
+ll_bs_new4_new<-function(pars,x){
+  -sum(log((1-pars[1])*bkg4(x)+pars[1]*fe4_norm(x,rnorm(1,14.908,0.005))))
 }
 
-# This simulation will take a very long time. 
-(n3=length(bs3));(n4=length(bs4));(n5=length(bs5));
-(n6=length(bs6));(n7=length(bs7));(n8=length(bs8));(n9=length(bs9))
-ns=c(n3,n4,n5,n6,n7,n8,n9)
-B=10000
-M=10
-for (i in 4){
-  for(eta in etas_new[15:18]){
-    for (b in 1:B){
-      init1=paste("xb=sampler_xb",i,"(",ns[i-2],")",sep="")
-      eval(parse(text=init1))
-      init2=paste("xs=sampler_xs",i,"(",ns[i-2],")",sep="")
-      eval(parse(text=init2))
-      init3=paste("Mat<-matrix(rep(0,",ns[i-2],"*","2),ncol=2,nrow=",ns[i-2],")",sep="")
-      eval(parse(text=init3))
-      Mat[,1]=xb
-      Mat[,2]=xs
-      init4=paste("flags=t(rmultinom(",ns[i-2], ",size=rep(1,2), prob=c(1-",eta,",",eta,")))",sep="")
-      eval(parse(text=init4))
-      # flags <- t(rmultinom(10*n, size=rep(1,2), prob=c(1-eta,eta)))
-      xx <-as.numeric(apply(Mat*flags,1,sum))
-      
-      init6=paste("LRT_eta.",eta,"_",i,"[b]=-2*(sum(log(bkg",i,"(xx)))+optimize(f=ll_bs_new",i,",interval=c(0,1), x=xx)$objective)",sep="")
-      eval(parse(text=init6))
-      print(c(i,eta,b))
-    }
-  }
+ll_bs_new5_new<-function(pars,x){
+  -sum(log((1-pars[1])*bkg5(x)+pars[1]*fe5_norm(x,rnorm(1,16.93,0.005))))
 }
-etas=etas_new[1:18]
-pval_like2=c();pval_like=c()
-for (i in 3:9){
-  initp = paste("pval_like[i-2]=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
-  eval(parse(text=initp))
-  initp2 = paste("pval_like2[i-2]=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
-  eval(parse(text=initp2))
-  initpo=paste("Power_like_",i,"=Power_like_sidak_",i,"=c()",sep="")
-  eval(parse(text=initpo))
-  for (j in 1:length(etas[1:18][-1])){
-    initpo1 = paste("Power_like_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
-    eval(parse(text=initpo1))
-    initpo2 = paste("Power_like_sidak_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
-    eval(parse(text=initpo2))
-  }
-}
-
-sqrt(pval_like2*(1-pval_like2)/B)
-
-
-alpha=0.05
-sidak=function(x,M=9){return(1-(1-x)^(1/M))}
-alphas=sidak(alpha,7)
-etas=etas_new[1:14]
-pval_like2=c()
-for (i in 4){
-  initp = paste("pval_like=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
-  eval(parse(text=initp))
-  initp2 = paste("pval_like2=mean((pchisq(LRT_eta.0_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
-  eval(parse(text=initp2))
-  initpo=paste("Power_like_",i,"=Power_like_sidak_",i,"=c()",sep="")
-  eval(parse(text=initpo))
-  for (j in 1:length(etas[1:14][-1])){
-    initpo1 = paste("Power_like_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alpha)",sep="")
-    eval(parse(text=initpo1))
-    initpo2 = paste("Power_like_sidak_",i,"[",j,"] = mean((pchisq(LRT_eta.",etas[j],"_",i,",df=1,lower.tail = FALSE)/2)<alphas)",sep="")
-    eval(parse(text=initpo2))
-  }
-}
-
-plot(etas_new[-1][1:17],Power_like_4,pch=17,col="red",type="o",yaxt="n")
-plot(etas_new[-1][1:17],Power_like_sidak_4,pch=18,col="red1",type="o")
-#Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=1.8,cex=2, col = "black", col.lab = "black")
-abline(h=0.5);abline(h=0.9)
-abline(v=0.161)
-
-
-
-
-
-
-
-func=function(x,thetas)
-{
-  thetas[1]*1+thetas[2]*(1.732051 + 3.464102*x) +thetas[3]*(2.236068 - 13.41641*x + 13.41641*x^2)+thetas[4]*
-    (-2.645751 + 31.74902*x - 79.37254*x^2 + 52.91503*x^3)
-}
-
-func=Vectorize(func)
-
-funcnew1<-function(thetas,x){
-  -sum(log(  thetas[1]*1+thetas[2]*(1.732051 + 3.464102*x) +
-               thetas[3]*(2.236068 - 13.41641*x + 13.41641*x^2)+
-               thetas[4]*
-               (-2.645751 + 31.74902*x - 79.37254*x^2 + 52.91503*x^3) ))}
-func=Vectorize(funcnew1)
-
-library("nloptr")
-opts7<-list("algorithm"="NLOPT_GN_ORIG_DIRECT",maxeval=1000)
-opts5_L<-list("algorithm"="NLOPT_LN_BOBYQA",maxeval=1000)
-
-MLE1<-nloptr(x0=c(1,1,1,1),
-             eval_f=funcnew1,lb=c(rep(-Inf,4)),ub=c(rep(Inf,4)),opts=opts5_L,x=bs1)
-
-fhat_bs1<-function(x)bs_model_new(x,MLEpar5_new_1$solution)
+set.seed(13)
+MLE4_new = optimize(f=ll_bs_new4_new, interval=c(0,1), x=bs4)
+MLE5_new = optimize(f=ll_bs_new5_new, interval=c(0,1), x=bs5)
+(pval_like4n_new=pchisq(-2*(sum(log(bkg4(bs4)))+ MLE4_new$objective),df=1,lower.tail = FALSE)/2) #
+(pval_like5n_new=pchisq(-2*(sum(log(bkg5(bs5)))+ MLE5_new$objective),df=1,lower.tail = FALSE)/2) #
 
