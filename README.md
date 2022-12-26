@@ -9,11 +9,7 @@ Data and R codes for the paper: A novel approach to detect line emission under h
 
 Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/datasets
 
-## Implementation of the codes 
-
-Download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
-
-### Download R and Necessary Packages
+## Download R and Necessary Packages
 
 First install R and load the LPBkg and LPsmooth package in R as:
 
@@ -25,7 +21,9 @@ library("LPBkg")
 
 library("LPsmooth")
 
-### Simulations
+## Implementation of the codes 
+
+Download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
 
 It may take a long time to run the simulation part, so we provide our simulation results above for your reference. 
 
