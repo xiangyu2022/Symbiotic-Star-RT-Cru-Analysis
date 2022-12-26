@@ -11,7 +11,7 @@ Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-A
 
 ## Implementation of the codes 
 
-You may download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
+Download the codes at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-Analysis/tree/main/codes 
 
 ### Download R and Necessary Packages
 
