@@ -768,7 +768,7 @@ for (j in 3:9){
 par(mar=c(4.5,5,3,0.5))
 plot(etas_new[-1][1:9],Power_naive_3[1:9],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
      ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
-     main="n3=730",cex.main=2.5,lwd=2.5)
+     main=expression("n"[3]*"=730"),cex.main=2.5,lwd=2.5,font.main=3)
 points(etas_new[-1][1:9],Power_Bonf_3[1:9],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
 points(etas_new[-1][1:9],Power_T1_3[1:9],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
 points(etas_new[-1][1:9],Power_like_3[1:9],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
@@ -777,8 +777,8 @@ points(etas_new[-1][1:9],Power_naive_sidak3[1:9],pch=2,col="dodgerblue",cex=2,ty
 points(etas_new[-1][1:9],Power_Bonf_sidak3[1:9],pch=0,col="tomato3",cex=2,type="o", lty=2,lwd=2.5) # Bon
 points(etas_new[-1][1:9],Power_T1_sidak3[1:9],pch=1,col="darkgreen",cex=2,type="o", lty=2,lwd=2.5) # T1
 points(etas_new[-1][1:9],Power_like_sidak_3[1:9],pch=5,col="grey1",cex=2,type="o", lty=2,lwd=2.5) # likelihood
-Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2,cex=2, col = "black", col.lab = "black")
-Axis(side = 1, at = c(0.005,0.025,0.05, 0.075, 0.1, 0.125,0.15, 0.175, 0.2), cex.axis=2,cex=2,col = "black", col.lab = "black")
+Axis(side = 2, at = c(0.1,0.3,0.5,0.7,0.9), cex.axis=2.5,cex=2.5, col = "black", col.lab = "black")
+Axis(side = 1, at = c(0.005,0.025,0.05, 0.075, 0.1, 0.125,0.15, 0.175, 0.2), cex.axis=2.5,cex=2.5,col = "black", col.lab = "black")
 abline(a=0.5,b=0,col="grey");abline(a=0.9,b=0,col="grey")
 # round(c(0.062,0.063,0.084,0.073,0.0875,0.092)*730,2)
 # round(c(0.096,0.098,0.117,0.106,0.122,0.122)*730,2)
@@ -788,7 +788,7 @@ abline(v=0.072,col="grey")
 # Power plot for region 4
 plot(etas_new[-1][1:13],Power_naive_4[1:13],pch=17,col="dodgerblue",xlab=expression(eta),ylim=c(0,1),
      ylab="Power",cex=2.5,type="o",cex.axis=2.5,cex.lab=2.5,xaxt='n',yaxt='n',
-     main="n4=247",cex.main=2.5,lwd=2.5)
+     main=expression("n"[4]*"=247"),cex.main=2.5,lwd=2.5)
 points(etas_new[-1][1:13],Power_Bonf_4[1:13],pch=15,col="tomato3",cex=2,type="o",lwd=2.5) # Bon
 points(etas_new[-1][1:13],Power_T1_4[1:13],pch=16,col="darkgreen",cex=2,type="o",lwd=2.5) # T1
 points(etas_new[-1][1:13],Power_like_4[1:13],pch=23,col="grey1",bg="grey1",cex=2,type="o",lwd=2.5) # likelihood
