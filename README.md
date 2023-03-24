@@ -34,4 +34,4 @@ For more technical problems, please contact the author of the paper Xiangyu Zhan
 
 ## References
 
-Zhang, X., Algeri, S., Kashyap, V., Karovska, M. (2022+) A novel approach to detect line emission under high background in high-resolution X-ray spectra.
+Zhang, X., Algeri, S., Kashyap, V., Karovska, M. (2023) A novel approach to detect line emission under high background in high-resolution X-ray spectra. Monthly Notices of the Royal Astronomical Society: stad398.
