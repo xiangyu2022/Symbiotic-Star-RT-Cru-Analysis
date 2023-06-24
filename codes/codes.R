@@ -504,15 +504,15 @@ fe<-function(x,w0){1/(1+((x-w0)/0.05)^2)^2.5}
 int1 <- function(w0) integrate(fe,lower=L1,upper=U1,w0=w0)$value
 fe1_norm <- function(x,w0) fe(x,w0)/int1(w0)
 ll_bs_new1<-function(pars,x){
-  -sum(log((1-sum(pars[1:3]))*bkg1(x)+pars[1]*fe1_norm(x,1.78499)+
-             pars[2]*fe1_norm(x,1.85247)+pars[3]*fe1_norm(x,1.94365)))
+  -sum(log((1-sum(pars[1:3]))*bkg1(x)+pars[1]*fe1_norm(x,rnorm(1,1.78499,0.005))+
+             pars[2]*fe1_norm(x,rnorm(1,1.85247,0.005))+pars[3]*fe1_norm(x,rnorm(1,1.94365,0.005))))
 }
 
 int2 <- function(w0) integrate(fe,lower=L2,upper=U2,w0=w0)$value
 fe2_norm <- function(x,w0) fe(x,w0)/int2(w0)
 ll_bs_new2<-function(pars,x){
-  -sum(log((1-sum(pars[1:3]))*bkg2(x)+pars[1]*fe2_norm(x,6.180)+
-             pars[2]*fe2_norm(x,7.171)+pars[3]*fe2_norm(x,8.419)))
+  -sum(log((1-sum(pars[1:3]))*bkg2(x)+pars[1]*fe2_norm(x,rnorm(1,6.180,0.005))+
+             pars[2]*fe2_norm(x,rnorm(1,7.171,0.005))+pars[3]*fe2_norm(x,rnorm(1,8.419,0.005))))
 }
 
 int3 <- function(w0) integrate(fe,lower=L3,upper=U3,w0=w0)$value
