@@ -11,7 +11,7 @@ Download the datasets at: https://github.com/xiangyu2022/Symbiotic-Star-RT-Cru-A
 
 ## Download R and Necessary Packages
 
-First install R and load the LPBkg and LPsmooth package in R as:
+First, install R and load the LPBkg and LPsmooth package in R as:
 
 install.packages("LPBkg")
 
